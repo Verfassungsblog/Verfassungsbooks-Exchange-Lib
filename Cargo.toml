@@ -1,0 +1,12 @@
+[package]
+name = "vb-exchange"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio-rustls = "0.26.0"
+rustls-pemfile = "2.1.2"
+bincode = { version = "2.0.0-rc.3",  features = ["serde"] }
+serde = { version = "1.0.204", features = ["derive"] }
+uuid = { version = "1.10.0", features = ["v4", "serde"] }
+tokio = { version = "1", features = ["full"] }
