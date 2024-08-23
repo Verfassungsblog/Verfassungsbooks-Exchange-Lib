@@ -10,3 +10,4 @@ bincode = { version = "2.0.0-rc.3",  features = ["serde"] }
 serde = { version = "1.0.204", features = ["derive"] }
 uuid = { version = "1.10.0", features = ["v4", "serde"] }
 tokio = { version = "1", features = ["full"] }
+async-recursion = "1.1.1"

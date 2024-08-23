@@ -1,15 +1,16 @@
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fmt::Display;
-use std::fs::{create_dir, create_dir_all, read_dir};
+use std::fs::{create_dir, create_dir_all};
 use std::path::PathBuf;
 use std::time::Duration;
+use async_recursion::async_recursion;
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::time;
 use tokio_rustls::TlsStream;
-use crate::export_formats::{ExportFormat, ExportStep};
+use crate::export_formats::ExportFormat;
 use crate::projects::PreparedProject;
 
 pub mod certs;
@@ -37,8 +38,8 @@ pub struct TemplateDataResult{
 }
 
 impl TemplateContents{
-    pub fn from_path(path: PathBuf) -> std::io::Result<TemplateContents>{
-        let contents = recursive_read_dir(path)?;
+    pub async fn from_path(path: PathBuf) -> tokio::io::Result<TemplateContents>{
+        let contents = recursive_read_dir_async(path).await?;
 
         Ok(TemplateContents{
             contents,
@@ -47,22 +48,22 @@ impl TemplateContents{
 
     /// Writes the template data to the specified path.
     /// If path does not exist, creates it.
-    pub fn to_file(self, dest: PathBuf) -> std::io::Result<()>{
+    pub async fn to_file(self, dest: PathBuf) -> tokio::io::Result<()>{
         if !&dest.try_exists()? {
             create_dir_all(&dest).unwrap();
         }
-        recursive_write_dir(dest, self.contents)?;
+        recursive_write_dir_async(dest, self.contents).await?;
 
         Ok(())
     }
 }
 
-fn recursive_read_dir(path: PathBuf) -> std::io::Result<Vec<FileOrFolder>>{
+#[async_recursion]
+pub async fn recursive_read_dir_async(path: PathBuf) -> tokio::io::Result<Vec<FileOrFolder>> {
     let mut contents: Vec<FileOrFolder> = Vec::new();
-    let entries = read_dir(path)?;
+    let mut entries = tokio::fs::read_dir(path).await?;
 
-    for entry in entries{
-        let entry = entry?;
+    while let Some(entry) = entries.next_entry().await? {
         let path = entry.path();
 
         let file_name = path.file_name().and_then(OsStr::to_str).map(String::from);
@@ -70,31 +71,40 @@ fn recursive_read_dir(path: PathBuf) -> std::io::Result<Vec<FileOrFolder>>{
             Some(fname) => fname,
             None => {
                 eprintln!("Warning: skipped file because of unreadable file name.");
-                continue
+                continue;
             }
         };
 
-        if path.is_dir(){
-            contents.push(FileOrFolder::Folder(TemplateFolder{ name: file_name, contents: recursive_read_dir(path)?}));
-        }else{
-            contents.push(FileOrFolder::File(NamedFile { name: file_name, content: std::fs::read(path)?}));
+        let metadata = entry.metadata().await?;
+
+        if metadata.is_dir() {
+            contents.push(FileOrFolder::Folder(NamedFolder {
+                name: file_name,
+                contents: recursive_read_dir_async(path).await?
+            }));
+        } else {
+            contents.push(FileOrFolder::File(NamedFile {
+                name: file_name,
+                content: tokio::fs::read(path).await?
+            }));
         }
     }
 
     Ok(contents)
 }
 
-fn recursive_write_dir(base_path: PathBuf, contents: Vec<FileOrFolder>) -> std::io::Result<()>{
+#[async_recursion]
+pub async fn recursive_write_dir_async(base_path: PathBuf, contents: Vec<FileOrFolder>) -> tokio::io::Result<()>{
     for entry in contents{
         match entry {
             FileOrFolder::File(file) => {
                 let res_path = base_path.join(PathBuf::from(file.name));
-                std::fs::write(res_path, file.content)?;
+                tokio::fs::write(res_path, file.content).await?;
             }
             FileOrFolder::Folder(folder) => {
                 let res_path = base_path.join(PathBuf::from(folder.name));
                 create_dir(&res_path)?;
-                recursive_write_dir(res_path, folder.contents)?;
+                recursive_write_dir_async(res_path, folder.contents).await?;
             }
         }
     }
@@ -110,11 +120,11 @@ pub struct TemplateContents{
 #[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
 pub enum FileOrFolder{
     File(NamedFile),
-    Folder(TemplateFolder)
+    Folder(NamedFolder)
 }
 
 #[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
-pub struct TemplateFolder{
+pub struct NamedFolder {
     pub name: String,
     pub contents: Vec<FileOrFolder>
 }
@@ -200,9 +210,14 @@ pub struct RenderingRequest{
     /// Random uuid to identify the rendering request
     #[bincode(with_serde)]
     pub request_id: uuid::Uuid,
+    /// All contents & metadata of the project as [PreparedProject]
     pub prepared_project: PreparedProject,
+    /// Contains files uploaded to the project, especially images from image blocks
+    pub project_uploaded_files: Vec<FileOrFolder>,
+    /// id of the template the project uses
     #[bincode(with_serde)]
     pub template_id: uuid::Uuid,
+    /// id of the version of the template
     #[bincode(with_serde)]
     pub template_version_id: uuid::Uuid,
     /// Export format names to render
@@ -289,10 +304,4 @@ pub async fn send_message(socket: &mut TlsStream<TcpStream>, message: Message) -
     }
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
 }
