@@ -213,7 +213,7 @@ pub struct RenderingRequest{
     /// All contents & metadata of the project as [PreparedProject]
     pub prepared_project: PreparedProject,
     /// Contains files uploaded to the project, especially images from image blocks
-    pub project_uploaded_files: Vec<FileOrFolder>,
+    pub project_uploaded_files: FilesOnMemoryOrHarddrive,
     /// id of the template the project uses
     #[bincode(with_serde)]
     pub template_id: uuid::Uuid,
@@ -222,6 +222,14 @@ pub struct RenderingRequest{
     pub template_version_id: uuid::Uuid,
     /// Export format names to render
     pub export_formats: Vec<String>
+}
+
+#[derive(bincode::Decode, bincode::Encode)]
+pub enum FilesOnMemoryOrHarddrive{
+    /// Contains the files directly
+    Memory(Vec<FileOrFolder>),
+    /// Contains a path to the folder with the files
+    Harddrive(PathBuf)
 }
 
 #[derive(bincode::Decode, bincode::Encode)]
