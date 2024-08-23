@@ -1,3 +1,4 @@
+use std::fmt;
 use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
@@ -90,8 +91,62 @@ pub enum PandocInputFormat {
     Vimwiki,
 }
 
+use PandocInputFormat::*;
+
+impl fmt::Display for PandocInputFormat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value = match &self {
+            BibTex => "bibtex",
+            BibLaTex => "biblatex",
+            Bits => "bits",
+            Commonmark => "commonmark",
+            CommonmarkX => "commonmark_x",
+            Creole => "creole",
+            CslJson => "csljson",
+            Csv => "csv",
+            Tsv => "tsv",
+            Djot => "djot",
+            DocBook => "docbook",
+            Docx => "docx",
+            DokuWiki => "dokuwiki",
+            EndNoteXml => "endnotexml",
+            Epub => "epub",
+            Fb2 => "fb2",
+            Gfm => "gfm",
+            Haddock => "haddock",
+            Html => "html",
+            Ipynb => "ipynb",
+            Jats => "jats",
+            Jira => "jira",
+            Json => "json",
+            Latex => "latex",
+            Markdown => "markdown",
+            MarkdownMmd => "markdown_mmd",
+            MarkdownPhpExtra => "markdown_phpextra",
+            MarkdownStrict => "markdown_strict",
+            Mediawiki => "mediawiki",
+            Man => "man",
+            Muse => "muse",
+            Native => "native",
+            Odt => "odt",
+            Opml => "opml",
+            Org => "org",
+            Ris => "ris",
+            Rtf => "rtf",
+            Rst => "rst",
+            T2t => "t2t",
+            Textile => "textile",
+            Tikiwiki => "tikiwiki",
+            Twiki => "twiki",
+            Typst => "typst",
+            Vimwiki => "vimwiki",
+        };
+        write!(f, "{}", value)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Encode, Decode, Clone)]
-enum PandocOutputFormat {
+pub enum PandocOutputFormat {
     Asciidoc,
     AsciidocLegacy,
     Asciidoctor,
@@ -158,6 +213,79 @@ enum PandocOutputFormat {
     Xwiki,
     Zimwiki,
 }
+
+impl fmt::Display for PandocOutputFormat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            PandocOutputFormat::Asciidoc => write!(f, "asciidoc"),
+            PandocOutputFormat::AsciidocLegacy => write!(f, "asciidoc_legacy"),
+            PandocOutputFormat::Asciidoctor => write!(f, "asciidoctor"),
+            PandocOutputFormat::Beamer => write!(f, "beamer"),
+            PandocOutputFormat::Bibtex => write!(f, "bibtex"),
+            PandocOutputFormat::Biblatex => write!(f, "biblatex"),
+            PandocOutputFormat::Chunkedhtml => write!(f, "chunkedhtml"),
+            PandocOutputFormat::Commonmark => write!(f, "commonmark"),
+            PandocOutputFormat::CommonmarkX => write!(f, "commonmark_x"),
+            PandocOutputFormat::Context => write!(f, "context"),
+            PandocOutputFormat::Csljson => write!(f, "csljson"),
+            PandocOutputFormat::Djot => write!(f, "djot"),
+            PandocOutputFormat::Docbook => write!(f, "docbook"),
+            PandocOutputFormat::Docbook4 => write!(f, "docbook4"),
+            PandocOutputFormat::Docbook5 => write!(f, "docbook5"),
+            PandocOutputFormat::Docx => write!(f, "docx"),
+            PandocOutputFormat::Dokuwiki => write!(f, "dokuwiki"),
+            PandocOutputFormat::Epub => write!(f, "epub"),
+            PandocOutputFormat::Epub3 => write!(f, "epub3"),
+            PandocOutputFormat::Epub2 => write!(f, "epub2"),
+            PandocOutputFormat::Fb2 => write!(f, "fb2"),
+            PandocOutputFormat::Gfm => write!(f, "gfm"),
+            PandocOutputFormat::Haddock => write!(f, "haddock"),
+            PandocOutputFormat::Html => write!(f, "html"),
+            PandocOutputFormat::Html5 => write!(f, "html5"),
+            PandocOutputFormat::Html4 => write!(f, "html4"),
+            PandocOutputFormat::Icml => write!(f, "icml"),
+            PandocOutputFormat::Ipynb => write!(f, "ipynb"),
+            PandocOutputFormat::JatsArchiving => write!(f, "jats_archiving"),
+            PandocOutputFormat::JatsArticleauthoring => write!(f, "jats_articleauthoring"),
+            PandocOutputFormat::JatsPublishing => write!(f, "jats_publishing"),
+            PandocOutputFormat::Jats => write!(f, "jats"),
+            PandocOutputFormat::Jira => write!(f, "jira"),
+            PandocOutputFormat::Json => write!(f, "json"),
+            PandocOutputFormat::Latex => write!(f, "latex"),
+            PandocOutputFormat::Man => write!(f, "man"),
+            PandocOutputFormat::Markdown => write!(f, "markdown"),
+            PandocOutputFormat::MarkdownMmd => write!(f, "markdown_mmd"),
+            PandocOutputFormat::MarkdownPhpextra => write!(f, "markdown_phpextra"),
+            PandocOutputFormat::MarkdownStrict => write!(f, "markdown_strict"),
+            PandocOutputFormat::Markua => write!(f, "markua"),
+            PandocOutputFormat::Mediawiki => write!(f, "mediawiki"),
+            PandocOutputFormat::Ms => write!(f, "ms"),
+            PandocOutputFormat::Muse => write!(f, "muse"),
+            PandocOutputFormat::Native => write!(f, "native"),
+            PandocOutputFormat::Odt => write!(f, "odt"),
+            PandocOutputFormat::Opml => write!(f, "opml"),
+            PandocOutputFormat::Opendocument => write!(f, "opendocument"),
+            PandocOutputFormat::Org => write!(f, "org"),
+            PandocOutputFormat::Pdf => write!(f, "pdf"),
+            PandocOutputFormat::Plain => write!(f, "plain"),
+            PandocOutputFormat::Pptx => write!(f, "pptx"),
+            PandocOutputFormat::Rst => write!(f, "rst"),
+            PandocOutputFormat::Rtf => write!(f, "rtf"),
+            PandocOutputFormat::Texinfo => write!(f, "texinfo"),
+            PandocOutputFormat::Textile => write!(f, "textile"),
+            PandocOutputFormat::Slideous => write!(f, "slideous"),
+            PandocOutputFormat::Slidy => write!(f, "slidy"),
+            PandocOutputFormat::Dzslides => write!(f, "dzslides"),
+            PandocOutputFormat::Revealjs => write!(f, "revealjs"),
+            PandocOutputFormat::S5 => write!(f, "s5"),
+            PandocOutputFormat::Tei => write!(f, "tei"),
+            PandocOutputFormat::Typst => write!(f, "typst"),
+            PandocOutputFormat::Xwiki => write!(f, "xwiki"),
+            PandocOutputFormat::Zimwiki => write!(f, "zimwiki"),
+        }
+    }
+}
+
 
 /// Process Input via Pandoc, e.g. to generate an epub
 /// This ExportStep variant is used to process input using Pandoc

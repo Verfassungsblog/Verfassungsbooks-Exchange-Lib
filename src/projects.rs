@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct ProjectSettings{
     pub toc_enabled: bool,
     pub csl_style: Option<String>,
+    pub csl_language_code: Option<String>
 }
 
 /// Struct holds a biography in a specified language for a person
@@ -99,7 +100,7 @@ pub enum IdentifierType{
 pub struct PreparedProject{
     pub metadata: PreparedMetadata,
     pub settings: Option<ProjectSettings>,
-    pub data: Vec<PreparedSection>,
+    pub sections: Vec<PreparedSection>,
 }
 
 #[derive(Serialize, Deserialize, Encode, Decode)]
