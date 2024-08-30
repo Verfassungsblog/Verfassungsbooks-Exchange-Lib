@@ -3,10 +3,16 @@ use serde::{Deserialize, Serialize};
 
 /// Struct holds all project-level settings
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub struct ProjectSettings{
+pub struct ProjectSettingsV3 {
     pub toc_enabled: bool,
     pub csl_style: Option<String>,
     pub csl_language_code: Option<String>
+}
+
+#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
+pub struct ProjectSettingsV2 {
+    pub toc_enabled: bool,
+    pub csl_style: Option<String>,
 }
 
 /// Struct holds a biography in a specified language for a person
@@ -99,7 +105,7 @@ pub enum IdentifierType{
 #[derive(Serialize, Deserialize, Encode, Decode)]
 pub struct PreparedProject{
     pub metadata: PreparedMetadata,
-    pub settings: Option<ProjectSettings>,
+    pub settings: Option<ProjectSettingsV3>,
     pub sections: Vec<PreparedSection>,
 }
 
