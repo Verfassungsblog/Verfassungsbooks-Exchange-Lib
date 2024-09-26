@@ -3,6 +3,29 @@ use serde::{Deserialize, Serialize};
 
 /// Struct holds all project-level settings
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
+pub struct ProjectSettingsV4 {
+    pub toc_enabled: bool,
+    pub csl_style: Option<String>,
+    pub csl_language_code: Option<String>,
+    pub metadata_page_additional_html: Option<String>,
+    pub cover_image_path: Option<String>,
+    pub backcover_image_path: Option<String>,
+}
+
+impl From<ProjectSettingsV3> for ProjectSettingsV4{
+    fn from(settings: ProjectSettingsV3) -> Self{
+        Self{
+            toc_enabled: settings.toc_enabled,
+            csl_style: settings.csl_style,
+            csl_language_code: settings.csl_language_code,
+            metadata_page_additional_html: None,
+            cover_image_path: None,
+            backcover_image_path: None,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
 pub struct ProjectSettingsV3 {
     pub toc_enabled: bool,
     pub csl_style: Option<String>,
@@ -105,7 +128,7 @@ pub enum IdentifierType{
 #[derive(Serialize, Deserialize, Encode, Decode)]
 pub struct PreparedProject{
     pub metadata: PreparedMetadata,
-    pub settings: Option<ProjectSettingsV3>,
+    pub settings: Option<ProjectSettingsV4>,
     pub sections: Vec<PreparedSection>,
 }
 
@@ -230,6 +253,7 @@ pub struct PreparedEndnote{
 pub struct PreparedSectionMetadata{
     pub title: String,
     pub subtitle: Option<String>,
+    pub toc_title: Option<String>,
     pub authors: Vec<Person>,
     pub editors: Vec<Person>,
     pub web_url: Option<String>,
