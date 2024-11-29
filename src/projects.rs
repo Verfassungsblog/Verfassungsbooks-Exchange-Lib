@@ -2,7 +2,7 @@ use bincode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 /// Struct holds all project-level settings
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq, Default)]
 pub struct ProjectSettingsV4 {
     pub toc_enabled: bool,
     pub csl_style: Option<String>,
