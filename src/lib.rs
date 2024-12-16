@@ -316,5 +316,10 @@ pub async fn send_message(socket: &mut TlsStream<TcpStream>, message: Message) -
         return Err(())
     }
 
+    if let Err(e) = socket.flush().await{
+        eprintln!("Couldn't flush socket: {}", e);
+        return Err(())
+    }
+
     Ok(())
 }
