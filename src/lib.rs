@@ -112,18 +112,18 @@ pub async fn recursive_write_dir_async(base_path: PathBuf, contents: Vec<FileOrF
     Ok(())
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TemplateContents{
     pub contents: Vec<FileOrFolder>
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub enum FileOrFolder{
     File(NamedFile),
     Folder(NamedFolder)
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NamedFolder {
     pub name: String,
     pub contents: Vec<FileOrFolder>
@@ -205,7 +205,7 @@ pub enum RenderingError{
     Other(String)
 }
 
-#[derive(bincode::Decode, bincode::Encode)]
+#[derive(bincode::Decode, bincode::Encode, Serialize, Deserialize)]
 pub struct RenderingRequest{
     /// Random uuid to identify the rendering request
     #[bincode(with_serde)]
@@ -224,7 +224,7 @@ pub struct RenderingRequest{
     pub export_formats: Vec<String>
 }
 
-#[derive(bincode::Decode, bincode::Encode)]
+#[derive(bincode::Decode, bincode::Encode, Serialize, Deserialize)]
 pub enum FilesOnMemoryOrHarddrive{
     /// Contains the files directly
     Memory(Vec<FileOrFolder>),
@@ -248,6 +248,8 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
     let timeout = Duration::from_secs(600);
     // Read length of message
 
+    println!("Reading message length");
+
     let read_future = socket.read_u64();
     let len = match time::timeout(timeout, read_future).await{
         Ok(Ok(len)) => len as usize,
@@ -260,10 +262,12 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
             return Err(())
         }
     };
+    println!("Message length: {}", len);
 
     // Read message into buffer
     let mut buf = vec![0; len];
 
+    println!("Reading message");
     let read_future = socket.read_exact(&mut buf);
     match time::timeout(timeout, read_future).await{
         Ok(Err(e)) => {
@@ -277,6 +281,7 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
         _ => {}
     }
 
+    println!("Decoding message");
     let msg : Message = match bincode::decode_from_slice(&buf, bincode::config::standard()){
         Ok((msg, _)) => msg,
         Err(e) => {
