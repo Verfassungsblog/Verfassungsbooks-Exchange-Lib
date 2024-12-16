@@ -305,16 +305,22 @@ pub async fn send_message(socket: &mut TlsStream<TcpStream>, message: Message) -
     };
     let len = encoded_msg.len() as u64;
 
+    println!("Sending message with length: {}", len);
+
     // Send length via socket:
     if let Err(e) = socket.write_u64(len).await{
         eprintln!("Couldn't send message length: {}", e);
         return Err(())
     };
 
+    println!("Sending message");
+
     if let Err(e) = socket.write_all(&encoded_msg[..]).await{
         eprintln!("Couldn't send message: {}", e);
         return Err(())
     }
+
+    println!("Flushing socket");
 
     if let Err(e) = socket.flush().await{
         eprintln!("Couldn't flush socket: {}", e);
