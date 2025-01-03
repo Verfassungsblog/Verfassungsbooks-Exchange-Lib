@@ -248,8 +248,6 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
     let timeout = Duration::from_secs(600);
     // Read length of message
 
-    println!("Reading message length");
-
     let read_future = socket.read_u64();
     let len = match time::timeout(timeout, read_future).await{
         Ok(Ok(len)) => len as usize,
@@ -262,12 +260,10 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
             return Err(())
         }
     };
-    println!("Message length: {}", len);
 
     // Read message into buffer
     let mut buf = vec![0; len];
 
-    println!("Reading message");
     let read_future = socket.read_exact(&mut buf);
     match time::timeout(timeout, read_future).await{
         Ok(Err(e)) => {
@@ -281,7 +277,6 @@ pub async fn read_message(socket: &mut TlsStream<TcpStream>) -> Result<Message, 
         _ => {}
     }
 
-    println!("Decoding message");
     let msg : Message = match bincode::decode_from_slice(&buf, bincode::config::standard()){
         Ok((msg, _)) => msg,
         Err(e) => {
@@ -305,22 +300,16 @@ pub async fn send_message(socket: &mut TlsStream<TcpStream>, message: Message) -
     };
     let len = encoded_msg.len() as u64;
 
-    println!("Sending message with length: {}", len);
-
     // Send length via socket:
     if let Err(e) = socket.write_u64(len).await{
         eprintln!("Couldn't send message length: {}", e);
         return Err(())
     };
 
-    println!("Sending message");
-
     if let Err(e) = socket.write_all(&encoded_msg[..]).await{
         eprintln!("Couldn't send message: {}", e);
         return Err(())
     }
-
-    println!("Flushing socket");
 
     if let Err(e) = socket.flush().await{
         eprintln!("Couldn't flush socket: {}", e);
