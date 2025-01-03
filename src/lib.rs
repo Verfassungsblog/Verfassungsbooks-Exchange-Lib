@@ -112,18 +112,18 @@ pub async fn recursive_write_dir_async(base_path: PathBuf, contents: Vec<FileOrF
     Ok(())
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TemplateContents{
     pub contents: Vec<FileOrFolder>
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub enum FileOrFolder{
     File(NamedFile),
     Folder(NamedFolder)
 }
 
-#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq)]
+#[derive(bincode::Decode, bincode::Encode, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NamedFolder {
     pub name: String,
     pub contents: Vec<FileOrFolder>
@@ -205,7 +205,7 @@ pub enum RenderingError{
     Other(String)
 }
 
-#[derive(bincode::Decode, bincode::Encode)]
+#[derive(bincode::Decode, bincode::Encode, Serialize, Deserialize)]
 pub struct RenderingRequest{
     /// Random uuid to identify the rendering request
     #[bincode(with_serde)]
@@ -224,7 +224,7 @@ pub struct RenderingRequest{
     pub export_formats: Vec<String>
 }
 
-#[derive(bincode::Decode, bincode::Encode)]
+#[derive(bincode::Decode, bincode::Encode, Serialize, Deserialize)]
 pub enum FilesOnMemoryOrHarddrive{
     /// Contains the files directly
     Memory(Vec<FileOrFolder>),
@@ -308,6 +308,11 @@ pub async fn send_message(socket: &mut TlsStream<TcpStream>, message: Message) -
 
     if let Err(e) = socket.write_all(&encoded_msg[..]).await{
         eprintln!("Couldn't send message: {}", e);
+        return Err(())
+    }
+
+    if let Err(e) = socket.flush().await{
+        eprintln!("Couldn't flush socket: {}", e);
         return Err(())
     }
 

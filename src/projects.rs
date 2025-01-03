@@ -136,8 +136,12 @@ pub struct PreparedProject{
 pub struct PreparedMetadata{
     /// Book Title
     pub title: String,
+    /// Optional override for the title in the Table of Contents
+    pub toc_title_override: Option<String>,
     /// Subtitle of the book
     pub subtitle: Option<String>,
+    /// Optional override for the subtitle in the Table of Contents
+    pub toc_subtitle_override: Option<String>,
     /// List of authors of the book
     pub authors: Vec<Person>,
     /// List of editors
