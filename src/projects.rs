@@ -177,8 +177,10 @@ pub struct PreparedMetadata{
 pub struct DetailedDate{
     pub year: u32,
     pub month: Option<u32>,
+    pub month_leading_zero: Option<String>,
     pub month_name: Option<MonthName>,
     pub day: Option<u32>,
+    pub day_leading_zero: Option<String>,
     pub day_weekday: Option<WeekdayName>,
 }
 
@@ -270,13 +272,24 @@ impl From<chrono::Weekday> for WeekdayName{
 
 impl From<chrono::NaiveDate> for DetailedDate{
     fn from(value: NaiveDate) -> Self {
+
         DetailedDate{
             year: value.year() as u32,
             month: Some(value.month() as u32),
+            month_leading_zero: Some(add_leading_zero(value.month() as u32)),
             month_name: Some(value.month().into()),
             day: Some(value.day() as u32),
+            day_leading_zero: Some(add_leading_zero(value.day() as u32)),
             day_weekday: Some(value.weekday().into()),
         }
+    }
+}
+
+fn add_leading_zero(value: u32) -> String{
+    if value < 10{
+        format!("0{}", value)
+    }else{
+        value.to_string()
     }
 }
 
