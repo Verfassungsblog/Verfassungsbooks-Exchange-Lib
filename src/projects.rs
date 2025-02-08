@@ -1,4 +1,5 @@
 use bincode::{Decode, Encode};
+use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 /// Struct holds all project-level settings
@@ -147,7 +148,7 @@ pub struct PreparedMetadata{
     /// List of identifiers of the book (e.g. ISBNs)
     pub identifiers: Option<Vec<Identifier>>,
     /// Date of publication
-    pub published: Option<String>,
+    pub published: Option<DetailedDate>,
     /// Languages of the book
     pub languages: Option<Vec<Language>>,
     /// Number of pages of the book (should be automatically calculated)
@@ -170,6 +171,126 @@ pub struct PreparedMetadata{
     pub edition: Option<String>,
     /// Publisher of the book
     pub publisher: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Encode, Decode)]
+pub struct DetailedDate{
+    pub year: u32,
+    pub month: Option<u32>,
+    pub month_leading_zero: Option<String>,
+    pub month_name: Option<MonthName>,
+    pub day: Option<u32>,
+    pub day_leading_zero: Option<String>,
+    pub day_weekday: Option<WeekdayName>,
+}
+
+#[derive(Serialize, Deserialize, Encode, Decode)]
+pub struct MonthName{
+    pub january: bool,
+    pub february: bool,
+    pub march: bool,
+    pub april: bool,
+    pub may: bool,
+    pub june: bool,
+    pub july: bool,
+    pub august: bool,
+    pub september: bool,
+    pub october: bool,
+    pub november: bool,
+    pub december: bool,
+}
+
+impl From<u32> for MonthName{
+    fn from(value: u32) -> Self {
+        let mut res = MonthName{
+            january: false,
+            february: false,
+            march: false,
+            april: false,
+            may: false,
+            june: false,
+            july: false,
+            august: false,
+            september: false,
+            october: false,
+            november: false,
+            december: false,
+        };
+        match value{
+            1 => res.january = true,
+            2 => res.february = true,
+            3 => res.march = true,
+            4 => res.april = true,
+            5 => res.may = true,
+            6 => res.june = true,
+            7 => res.july = true,
+            8 => res.august = true,
+            9 => res.september = true,
+            10 => res.october = true,
+            11 => res.november = true,
+            12 => res.december = true,
+            _ => (),
+        }
+        res
+    }
+}
+
+#[derive(Serialize, Deserialize, Encode, Decode)]
+pub struct WeekdayName{
+    pub monday: bool,
+    pub tuesday: bool,
+    pub wednesday: bool,
+    pub thursday: bool,
+    pub friday: bool,
+    pub saturday: bool,
+    pub sunday: bool,
+}
+
+impl From<chrono::Weekday> for WeekdayName{
+    fn from(value: chrono::Weekday) -> Self {
+        let mut res = WeekdayName{
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+        };
+        match value{
+            chrono::Weekday::Mon => res.monday = true,
+            chrono::Weekday::Tue => res.tuesday = true,
+            chrono::Weekday::Wed => res.wednesday = true,
+            chrono::Weekday::Thu => res.thursday = true,
+            chrono::Weekday::Fri => res.friday = true,
+            chrono::Weekday::Sat => res.saturday = true,
+            chrono::Weekday::Sun => res.sunday = true,
+        }
+        res
+    }
+}
+
+impl From<chrono::NaiveDate> for DetailedDate{
+    fn from(value: NaiveDate) -> Self {
+
+        DetailedDate{
+            year: value.year() as u32,
+            month: Some(value.month() as u32),
+            month_leading_zero: Some(add_leading_zero(value.month() as u32)),
+            month_name: Some(value.month().into()),
+            day: Some(value.day() as u32),
+            day_leading_zero: Some(add_leading_zero(value.day() as u32)),
+            day_weekday: Some(value.weekday().into()),
+        }
+    }
+}
+
+fn add_leading_zero(value: u32) -> String{
+    if value < 10{
+        format!("0{}", value)
+    }else{
+        value.to_string()
+    }
 }
 
 /// Represents a Keyword, optionally with a GND ID
@@ -259,7 +380,7 @@ pub struct PreparedSectionMetadata{
     pub editors: Vec<Person>,
     pub web_url: Option<String>,
     pub identifiers: Vec<Identifier>,
-    pub published: Option<String>,
+    pub published: Option<DetailedDate>,
     pub lang: PreparedLanguage,
 }
 
