@@ -1,5 +1,5 @@
 use bincode::{Decode, Encode};
-use chrono::{Datelike, Month, NaiveDateTime};
+use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 /// Struct holds all project-level settings
@@ -268,8 +268,8 @@ impl From<chrono::Weekday> for WeekdayName{
     }
 }
 
-impl From<chrono::NaiveDateTime> for DetailedDate{
-    fn from(value: NaiveDateTime) -> Self {
+impl From<chrono::NaiveDate> for DetailedDate{
+    fn from(value: NaiveDate) -> Self {
         DetailedDate{
             year: value.year() as u32,
             month: Some(value.month() as u32),
