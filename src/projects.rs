@@ -147,7 +147,7 @@ pub struct PreparedMetadata{
     /// List of identifiers of the book (e.g. ISBNs)
     pub identifiers: Option<Vec<Identifier>>,
     /// Date of publication
-    pub published: Option<String>,
+    pub published: Option<DetailedDate>,
     /// Languages of the book
     pub languages: Option<Vec<Language>>,
     /// Number of pages of the book (should be automatically calculated)
@@ -170,6 +170,15 @@ pub struct PreparedMetadata{
     pub edition: Option<String>,
     /// Publisher of the book
     pub publisher: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Encode, Decode)]
+pub struct DetailedDate{
+    pub year: u32,
+    pub month: Option<u32>,
+    pub month_name: Option<String>,
+    pub day: Option<u32>,
+    pub day_weekday: Option<String>,
 }
 
 /// Represents a Keyword, optionally with a GND ID
@@ -259,7 +268,7 @@ pub struct PreparedSectionMetadata{
     pub editors: Vec<Person>,
     pub web_url: Option<String>,
     pub identifiers: Vec<Identifier>,
-    pub published: Option<String>,
+    pub published: Option<DetailedDate>,
     pub lang: PreparedLanguage,
 }
 
