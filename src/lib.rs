@@ -172,6 +172,7 @@ impl Display for RenderingError{
             RenderingError::HandlebarsRenderingFailed(log) => format!("Couldn't render Template: {}", log),
             RenderingError::MissingExpectedFileToKeep(filename, log) => format!("Couldn't find the expected file {} after rendering: {}", filename, log),
             RenderingError::VivliostyleRenderingFailed(log) => format!("Couldn't render PDF with vivliostyle: {}", log),
+            RenderingError::WeasyprintRenderingFailed(log) => format!("Couldn't render PDF with weasyprint: {}", log),
             RenderingError::PandocConversionFailed(log) => format!("Couldn't convert with pandoc: {}", log),
             RenderingError::NoResultFiles => String::from("No file was transmitted. Check your templates export steps."),
             RenderingError::Other(other) => format!("Error occured: {}", other)
@@ -199,6 +200,8 @@ pub enum RenderingError{
     MissingExpectedFileToKeep(String, String),
     /// Vivliostyle didn't run sucessfully, String contains the rendering log
     VivliostyleRenderingFailed(String),
+    /// Weasyprint didn't run sucessfully, String contains the rendering log
+    WeasyprintRenderingFailed(String),
     /// Pandoc didn't run successsfully, String contains the rendering log
     PandocConversionFailed(String),
     NoResultFiles,
