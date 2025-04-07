@@ -53,7 +53,7 @@ pub struct WeasyprintExportStep {
     /// Path to output of PDF (e.g. book.pdf)
     pub output_file: String,
     /// PDF variant (e.g. PDF/A etc.)
-    pub pdf_variant: WeasyprintPDFVariant,
+    pub pdf_variant: Option<WeasyprintPDFVariant>,
 }
 
 /// PDF variants supported by Weasyprint (via --pdf-variant)
