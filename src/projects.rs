@@ -15,6 +15,8 @@ pub struct ProjectSettingsV5 {
     pub add_soft_hyphens: bool,
 }
 
+pub type Biography = BiographyV2;
+
 /// Struct holds a biography in a specified language for a person
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
 pub struct BiographyV2 {
@@ -22,6 +24,8 @@ pub struct BiographyV2 {
     #[bincode(with_serde)]
     pub lang: Option<language::Language>,
 }
+
+pub type Person = PersonV2;
 
 /// Struct holds all data for a person (e.g. author or editor)
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
@@ -32,7 +36,7 @@ pub struct PersonV2 {
     pub last_names: String,
     pub orcid: Option<Identifier>,
     pub gnd: Option<Identifier>,
-    pub bios: Option<Vec<BiographyV2>>,
+    pub bios: Option<Vec<Biography>>,
     pub ror: Option<Identifier>,
 }
 
