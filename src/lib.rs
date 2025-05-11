@@ -15,6 +15,7 @@ use crate::projects::PreparedProject;
 
 pub mod certs;
 pub mod projects;
+pub mod deprecated;
 pub mod export_formats;
 
 #[derive(bincode::Decode, bincode::Encode)]

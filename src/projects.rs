@@ -1,7 +1,7 @@
 use bincode::{Decode, Encode};
 use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
-
+use crate::deprecated::projects::data_storage::{BiographyV1, OldLanguage};
 
 /// Struct holds all project-level settings
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq, Default)]
@@ -15,83 +15,26 @@ pub struct ProjectSettingsV5 {
     pub add_soft_hyphens: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq, Default)]
-pub struct ProjectSettingsV4 {
-    pub toc_enabled: bool,
-    pub csl_style: Option<String>,
-    pub csl_language_code: Option<String>,
-    pub metadata_page_additional_html: Option<String>,
-    pub cover_image_path: Option<String>,
-    pub backcover_image_path: Option<String>,
-}
-
-impl From<ProjectSettingsV4> for ProjectSettingsV5 {
-    fn from(settings: ProjectSettingsV4) -> Self{
-        Self{
-            toc_enabled: settings.toc_enabled,
-            csl_style: settings.csl_style,
-            csl_language_code: settings.csl_language_code,
-            metadata_page_additional_html: settings.metadata_page_additional_html,
-            cover_image_path: settings.cover_image_path,
-            backcover_image_path: settings.backcover_image_path,
-            add_soft_hyphens: true,
-        }
-    }
-}
-
-impl From<ProjectSettingsV3> for ProjectSettingsV4 {
-    fn from(settings: ProjectSettingsV3) -> Self{
-        Self{
-            toc_enabled: settings.toc_enabled,
-            csl_style: settings.csl_style,
-            csl_language_code: settings.csl_language_code,
-            metadata_page_additional_html: None,
-            cover_image_path: None,
-            backcover_image_path: None,
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub struct ProjectSettingsV3 {
-    pub toc_enabled: bool,
-    pub csl_style: Option<String>,
-    pub csl_language_code: Option<String>
-}
-
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub struct ProjectSettingsV2 {
-    pub toc_enabled: bool,
-    pub csl_style: Option<String>,
-}
-
 /// Struct holds a biography in a specified language for a person
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub struct Biography {
+pub struct BiographyV2 {
     pub content: String,
-    pub lang: Option<Language>,
-}
-
-/// Enum to differentiate between all supported languages
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub enum Language{
-    DE,
-    EN
+    #[bincode(with_serde)]
+    pub lang: Option<language::Language>,
 }
 
 /// Struct holds all data for a person (e.g. author or editor)
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
-pub struct Person {
+pub struct PersonV2 {
     #[bincode(with_serde)]
     pub id: Option<uuid::Uuid>,
     pub first_names: Option<String>,
     pub last_names: String,
     pub orcid: Option<Identifier>,
     pub gnd: Option<Identifier>,
-    pub bios: Option<Vec<Biography>>,
+    pub bios: Option<Vec<BiographyV2>>,
     pub ror: Option<Identifier>,
 }
-
 
 /// Represents an identifier (e.g. DOI, ISBN, ISSN, URL, URN, ORCID, ROR, ...)
 #[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
@@ -166,9 +109,9 @@ pub struct PreparedMetadata{
     /// Subtitle of the book
     pub subtitle: Option<String>,
     /// List of authors of the book
-    pub authors: Vec<Person>,
+    pub authors: Vec<PersonV2>,
     /// List of editors
-    pub editors: Vec<Person>,
+    pub editors: Vec<PersonV2>,
     /// URL to a web version of the book or reference
     pub web_url: Option<String>,
     /// List of identifiers of the book (e.g. ISBNs)
@@ -176,7 +119,7 @@ pub struct PreparedMetadata{
     /// Date of publication
     pub published: Option<DetailedDate>,
     /// Languages of the book
-    pub languages: Option<Vec<Language>>,
+    pub languages: Option<Vec<OldLanguage>>,
     /// Number of pages of the book (should be automatically calculated)
     pub number_of_pages: Option<u32>,
     /// Short abstract of the book
@@ -402,8 +345,8 @@ pub struct PreparedSectionMetadata{
     pub toc_title_override: Option<String>,
     pub subtitle: Option<String>,
     pub toc_subtitle_override: Option<String>,
-    pub authors: Vec<Person>,
-    pub editors: Vec<Person>,
+    pub authors: Vec<PersonV2>,
+    pub editors: Vec<PersonV2>,
     pub web_url: Option<String>,
     pub identifiers: Vec<Identifier>,
     pub published: Option<DetailedDate>,
