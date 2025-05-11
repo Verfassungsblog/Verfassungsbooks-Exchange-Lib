@@ -1,5 +1,6 @@
 use bincode::{Decode, Encode};
 use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
+use language::Language;
 use serde::{Deserialize, Serialize};
 use crate::deprecated::projects::data_storage::{BiographyV1, OldLanguage};
 
@@ -123,7 +124,8 @@ pub struct PreparedMetadata{
     /// Date of publication
     pub published: Option<DetailedDate>,
     /// Languages of the book
-    pub languages: Option<Vec<OldLanguage>>,
+    #[bincode(with_serde)]
+    pub languages: Option<Vec<Language>>,
     /// Number of pages of the book (should be automatically calculated)
     pub number_of_pages: Option<u32>,
     /// Short abstract of the book
