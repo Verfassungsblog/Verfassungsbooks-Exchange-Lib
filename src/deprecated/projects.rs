@@ -71,9 +71,9 @@ pub mod data_storage{
         EN
     }
 
-    impl Into<Language> for OldLanguage {
-        fn into(self) -> Language {
-            match self{
+    impl From<OldLanguage> for Language {
+        fn from(value: OldLanguage) -> Self {
+            match value {
                 OldLanguage::DE => Language::DeDe,
                 OldLanguage::EN => Language::EnUs,
             }
@@ -87,11 +87,11 @@ pub mod data_storage{
         pub lang: Option<OldLanguage>,
     }
 
-    impl Into<BiographyV2> for BiographyV1 {
-        fn into(self) -> BiographyV2 {
-            BiographyV2{
-                content: self.content,
-                lang: self.lang.map(|x|x.into()),
+    impl From<BiographyV1> for BiographyV2 {
+        fn from(value: BiographyV1) -> Self {
+            Self {
+                content: value.content,
+                lang: value.lang.map(|x| x.into()),
             }
         }
     }
@@ -109,16 +109,16 @@ pub mod data_storage{
         pub ror: Option<Identifier>,
     }
 
-    impl Into<PersonV2> for PersonV1 {
-        fn into(self) -> PersonV2 {
-            PersonV2 {
-                id: self.id,
-                first_names: self.first_names,
-                last_names: self.last_names,
-                orcid: self.orcid,
-                gnd: self.gnd,
-                bios: self.bios.map(|b| b.into_iter().map(|bio| bio.into()).collect()),
-                ror: self.ror,
+    impl From<PersonV1> for PersonV2 {
+        fn from(person: PersonV1) -> Self {
+            Self {
+                id: person.id,
+                first_names: person.first_names,
+                last_names: person.last_names,
+                orcid: person.orcid,
+                gnd: person.gnd,
+                bios: person.bios.map(|b| b.into_iter().map(|bio| bio.into()).collect()),
+                ror: person.ror,
             }
         }
     }
