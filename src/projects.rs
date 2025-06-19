@@ -348,9 +348,8 @@ pub struct PreparedEndnote{
 #[derive(Serialize, Deserialize, Encode, Decode)]
 pub struct PreparedSectionMetadata{
     pub title: String,
-    pub toc_title_override: Option<String>,
+    pub toc_title_subtitle_override: Option<String>,
     pub subtitle: Option<String>,
-    pub toc_subtitle_override: Option<String>,
     pub authors: Vec<PersonOrString>,
     pub editors: Vec<PersonOrString>,
     pub web_url: Option<String>,
