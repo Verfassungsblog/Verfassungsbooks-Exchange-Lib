@@ -115,9 +115,9 @@ pub struct PreparedMetadata{
     /// Subtitle of the book
     pub subtitle: Option<String>,
     /// List of authors of the book
-    pub authors: Vec<PersonV2>,
+    pub authors: Vec<PersonOrString>,
     /// List of editors
-    pub editors: Vec<PersonV2>,
+    pub editors: Vec<PersonOrString>,
     /// URL to a web version of the book or reference
     pub web_url: Option<String>,
     /// List of identifiers of the book (e.g. ISBNs)
