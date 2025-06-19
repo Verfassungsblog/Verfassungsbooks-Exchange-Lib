@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use bincode::{Decode, Encode};
 use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
 use language::Language;
@@ -359,10 +360,52 @@ pub struct PreparedSectionMetadata{
     pub lang: Option<Language>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone)]
 pub enum PersonOrString{
     Person(Person),
     NameString(String)
+}
+
+impl Eq for PersonOrString {}
+
+impl PartialEq<Self> for PersonOrString {
+    fn eq(&self, other: &Self) -> bool {
+        match self{
+            PersonOrString::Person(person1) => {
+                if let PersonOrString::Person(person2) = other{
+                    return person1.eq(person2)
+                }
+            }
+            PersonOrString::NameString(ns1) => {
+                if let PersonOrString::NameString(ns2) = other{
+                    return ns1.eq(ns2)
+                }
+            }
+        }
+        false
+    }
+}
+
+impl PartialOrd<Self> for PersonOrString {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PersonOrString{
+    fn cmp(&self, other: &Self) -> Ordering {
+        let cmp_a = match self{
+            PersonOrString::Person(person) => &person.last_names,
+            PersonOrString::NameString(ns) => ns.split(" ").last().unwrap_or(""),
+        };
+
+        let cmp_b = match self{
+            PersonOrString::Person(person) => &person.last_names,
+            PersonOrString::NameString(ns) => ns.split(" ").last().unwrap_or(""),
+        };
+
+        cmp_a.cmp(&cmp_b)
+    }
 }
 
 #[derive(Serialize, Deserialize, Encode, Decode)]
