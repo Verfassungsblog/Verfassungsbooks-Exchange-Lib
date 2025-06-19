@@ -351,13 +351,19 @@ pub struct PreparedSectionMetadata{
     pub toc_title_override: Option<String>,
     pub subtitle: Option<String>,
     pub toc_subtitle_override: Option<String>,
-    pub authors: Vec<PersonV2>,
-    pub editors: Vec<PersonV2>,
+    pub authors: Vec<PersonOrString>,
+    pub editors: Vec<PersonOrString>,
     pub web_url: Option<String>,
     pub identifiers: Vec<Identifier>,
     pub published: Option<DetailedDate>,
     #[bincode(with_serde)]
     pub lang: Option<Language>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Encode, Decode, Clone, PartialEq)]
+pub enum PersonOrString{
+    Person(Person),
+    NameString(String)
 }
 
 #[derive(Serialize, Deserialize, Encode, Decode)]
