@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use bincode::{Decode, Encode};
 use chrono::{Datelike, Month, NaiveDate, NaiveDateTime};
 use language::Language;
@@ -147,6 +148,8 @@ pub struct PreparedMetadata{
     pub edition: Option<String>,
     /// Publisher of the book
     pub publisher: Option<String>,
+    /// Optional custom fields
+    pub custom_fields: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Encode, Decode)]
