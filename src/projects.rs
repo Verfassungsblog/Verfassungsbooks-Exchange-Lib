@@ -18,6 +18,24 @@ pub struct ProjectSettingsV5 {
     pub add_soft_hyphens: bool,
 }
 
+/// `metadata_page_additional_html` has no backing column in `projects` and always round-trips
+/// as `None`; `toc_enabled`/`add_soft_hyphens` are nullable columns that default to `false`.
+#[cfg(feature = "sqlx")]
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for ProjectSettingsV5 {
+    fn from_row(row: &'r sqlx::postgres::PgRow) -> sqlx::Result<Self> {
+        use sqlx::Row;
+        Ok(ProjectSettingsV5 {
+            toc_enabled: row.try_get::<Option<bool>, _>("toc_enabled")?.unwrap_or(false),
+            csl_style: row.try_get("csl_style")?,
+            csl_language_code: row.try_get("csl_language_code")?,
+            metadata_page_additional_html: None,
+            cover_image_path: row.try_get("cover_image_path")?,
+            backcover_image_path: row.try_get("backcover_image_path")?,
+            add_soft_hyphens: row.try_get::<Option<bool>, _>("add_soft_hyphens")?.unwrap_or(false),
+        })
+    }
+}
+
 pub type Biography = BiographyV2;
 
 /// Struct holds a biography in a specified language for a person
@@ -26,6 +44,21 @@ pub struct BiographyV2 {
     pub content: String,
     #[bincode(with_serde)]
     pub lang: Option<language::Language>,
+}
+
+/// `content`/`language` are the `biographies` table's only columns; `language` is stored as a
+/// non-null tag and parsed back into `Option<Language>` (an unrecognized tag round-trips as
+/// `None`, same lossiness the manual mapping this replaces already had).
+#[cfg(feature = "sqlx")]
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for BiographyV2 {
+    fn from_row(row: &'r sqlx::postgres::PgRow) -> sqlx::Result<Self> {
+        use sqlx::Row;
+        let language: String = row.try_get("language")?;
+        Ok(BiographyV2 {
+            content: row.try_get("content")?,
+            lang: language::Language::from_tag(&language),
+        })
+    }
 }
 
 pub type Person = PersonV2;
@@ -41,6 +74,29 @@ pub struct PersonV2 {
     pub gnd: Option<Identifier>,
     pub bios: Option<Vec<Biography>>,
     pub ror: Option<Identifier>,
+}
+
+/// The `persons` table only stores each identifier's `.value` (its `id`/`name` are
+/// regenerated on every load, same lossiness the manual mapping this replaces already had),
+/// and `bios` lives in a separate `biographies` table joined per-row — always `None` here;
+/// callers that need biographies fetch them separately and fill the field in afterward.
+#[cfg(feature = "sqlx")]
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for PersonV2 {
+    fn from_row(row: &'r sqlx::postgres::PgRow) -> sqlx::Result<Self> {
+        use sqlx::Row;
+        let orcid: Option<String> = row.try_get("orcid")?;
+        let gnd: Option<String> = row.try_get("gnd")?;
+        let ror: Option<String> = row.try_get("ror")?;
+        Ok(PersonV2 {
+            id: Some(row.try_get("id")?),
+            first_names: row.try_get("first_names")?,
+            last_names: row.try_get("last_names")?,
+            orcid: orcid.map(|value| Identifier::new(IdentifierType::ORCID, value, None)),
+            gnd: gnd.map(|value| Identifier::new(IdentifierType::GND, value, None)),
+            ror: ror.map(|value| Identifier::new(IdentifierType::ROR, value, None)),
+            bios: None,
+        })
+    }
 }
 
 /// Represents an identifier (e.g. DOI, ISBN, ISSN, URL, URN, ORCID, ROR, ...)
